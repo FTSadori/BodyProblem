@@ -1,15 +1,3 @@
-#import numpy as np
-#import matplotlib.pyplot as plt
-
-#class MassObject:
-#	def __init__(self, mass, position, velocity):
-#		self.mass = mass
-#		self.position = position
-#		self.velocity = velocity
-
-#Obj1 = MassObject(1000, np.array([0, 0]), np.array([0, 0]))
-#Obj2 = MassObject(100, np.array([5, 0]), np.array([0, 2]))
-
 from vpython import *
 
 G = 6.67e-11
@@ -40,11 +28,9 @@ print(v1circle)
 
 # We are working in xy plane
 star1.v = vector(0, 0.7 * v1circle, 0)
-# star1.v = vector(0, 29700, 0)
 
-# Momentum p1
+# Momentum
 star1.p = m1 * star1.v
-
 star2.p = -star1.p
 
 # Reduced mass
@@ -55,25 +41,34 @@ l = mag(cross(star1.pos, star1.p) +
 	cross(star2.pos, star2.p))
 
 t = 0
+# Delta time
 dt = 1000
 
+# Graph of potential energy
 tgraph = graph(xtitle = "r [m]", ytitle = "U [J]")
 fU = gcurve(color = color.blue, dot = True)
 fUg = gcurve(color = color.green, dot = True)
 fUc = gcurve(color = color.purple, dot = True)
 
 while t < 1e8:
+	# Equivalent for Sleep(1 / 1000) (1000 operations per second)
 	rate(1000)
 	r = star2.pos - star1.pos
 	F2 = -G * m1 * m2 * norm(r) / mag(r) ** 2
+	# Change of potential due to gravitational force (F = ma; p = mv; p + F * dt = m(v + dt * a))
 	star2.p += F2 * dt
 	star1.p -= F2 * dt
+	# Change of position due to change of speed (p = mv; pos += v * dt; pos += p * dt / m)
 	star1.pos += star1.p * dt / m1
 	star2.pos +=  star2.p * dt / m2
 
+	# Showing the potential energy Ueff = Ugravitational + Ucentrifugal
+	# Ug is antiderivative from Fgravitational
+	# Formula for Uc is too hard to explain here
 	Ug = -G * m1 * m2 / mag(r)
 	Uc = l ** 2 / (2 * mu * mag(r) ** 2)
 	Uef = Ug + Uc
+	
 	fU.plot(mag(r), Uef)
 	fUg.plot(mag(r), Ug)
 	fUc.plot(mag(r), Uc)
